@@ -3,36 +3,52 @@ from aigyminsper.search.graph import State
 
 class AspiradorPo(State):
 
-    def __init__(self, op, posicao_robo, condicao_esq="sujo", condicao_dir="sujo"):
+    def __init__(self, op, posicao_robo, condicao_d1="sujo", condicao_d2="sujo", condicao_d3="sujo", condicao_d4="sujo"):
         # voce sempre deve usar esta chamada para inicializar a superclasse
         super().__init__(op)
-        # recebe esquerda ou direita
+        # recebe (0,0), (1,0), (1,1), (0,1)
         self.posicao_robo = posicao_robo
         # recebe limpo ou sujo
-        self.condicao_esq = condicao_esq
+        self.condicao_d1 = condicao_d1
         # recebe limpo ou sujo
-        self.condicao_dir = condicao_dir
+        self.condicao_d2 = condicao_d2
+        # recebe limpo ou sujo
+        self.condicao_d3 = condicao_d3
+        # recebe limpo ou sujo
+        self.condicao_d4 = condicao_d4
     
     def successors(self):
         successors = []
-
+        x,y = self.posicao_robo
         #consequência de ir para esq
-        successors.append(AspiradorPo('ir para esq', 'esq', self.condicao_esq, self.condicao_dir))
+        if x==1:
+            successors.append(AspiradorPo('ir para esq', (x-1, y), self.condicao_d1, self.condicao_d2, self.condicao_d3, self.condicao_d4))
         #consequência de ir para dir
-        successors.append(AspiradorPo('ir para dir', 'dir', self.condicao_esq, self.condicao_dir))
+        if x==0:
+            successors.append(AspiradorPo('ir para dir', (x+1, y), self.condicao_d1, self.condicao_d2, self.condicao_d3, self.condicao_d4))
+        #consequência de ir para dir
+        if y==0:
+            successors.append(AspiradorPo('ir para cima', (x, y+1), self.condicao_d1, self.condicao_d2, self.condicao_d3, self.condicao_d4))
+        if y==1:
+        #consequência de ir para 
+            successors.append(AspiradorPo('ir para baixo', (x, y-1), self.condicao_d1, self.condicao_d2, self.condicao_d3, self.condicao_d4))
 
         #consequência de limpar
-        if self.posicao_robo == "esq":
-            successors.append(AspiradorPo('limpar', self.posicao_robo, "limpo", self.condicao_dir))
-        elif self.posicao_robo == "dir":
-            successors.append(AspiradorPo('limpar', self.posicao_robo, self.condicao_esq, "limpo"))
+        if self.posicao_robo == (0,0):
+            successors.append(AspiradorPo('limpar', self.posicao_robo, "limpo", self.condicao_d2, self.condicao_d3, self.condicao_d4))
+        elif self.posicao_robo == (1,0):
+            successors.append(AspiradorPo('limpar', self.posicao_robo, self.condicao_d1, "limpo", self.condicao_d3, self.condicao_d4))
+        elif self.posicao_robo == (0,1):
+            successors.append(AspiradorPo('limpar', self.posicao_robo, self.condicao_d1, self.condicao_d2, "limpo", self.condicao_d4))
+        elif self.posicao_robo == (1,1):
+            successors.append(AspiradorPo('limpar', self.posicao_robo, self.condicao_d1, self.condicao_d2, self.condicao_d3, "limpo"))
 
 
 
         return successors
     
     def is_goal(self):
-        return self.condicao_dir == "limpo" and self.condicao_esq == "limpo"
+        return self.condicao_d1 == "limpo" and self.condicao_d2 == "limpo" and self.condicao_d3 == "limpo" and self.condicao_d4 == "limpo"
     
     def description(self):
         return "O aspirador deve limpar os cômodos que estão sujos"
@@ -59,7 +75,7 @@ class AspiradorPo(State):
 
 def main():
     print('Busca em largura')
-    state = AspiradorPo('', 'esq', 'sujo', 'sujo')
+    state = AspiradorPo('', (0,0), 'sujo', 'sujo', 'sujo', 'sujo')
     algorithm = BuscaLargura()
     result = algorithm.search(state)
     if result != None:
